@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Product } from './product.entity';
 
@@ -6,9 +6,10 @@ import { Product } from './product.entity';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService){}
 
-  @Get('/order')
-  getECPayForm(): string {
-    return this.productsService.getECPayForm();
+  // Post2ecpay
+  @Get('/order/:id')
+  async getECPayForm(@Param('id') id: number): Promise<string> {
+    return await this.productsService.getECPayForm(id);
   }
 
   @Post('/result')
@@ -31,6 +32,15 @@ export class ProductsController {
     }
   }
 
+  //delete 
+  @Delete(':id')
+  async delete(@Param('id') id: number): Promise<void> {
+    const product = await this.productsService.findOne(id);
+    if (!product) {
+      throw new Error('product not found');
+    }
+    return this.productsService.delete(id);
+  }
 
   // 建立訂單
   @Post()

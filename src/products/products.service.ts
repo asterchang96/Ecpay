@@ -27,15 +27,17 @@ export class ProductsService {
 
     // 必填欄位
     const newProduct = await this.productsRepository.create(product);
-    // itemName、tradeAmt、tradeDesc
+    // itemName、totalAmount、tradeDesc
     // 補上欄位
     Object.assign(newProduct, {
-      merchantID: 'WIN' + getCurrentTaipeiTimeString('DatetimeString'),
-      merchantTradeNo: '',
+      merchantID: '',
+      tradeAmt:0,
+      merchantTradeNo: 'WIN' + getCurrentTaipeiTimeString('DatetimeString'),
       paymentType: 'unpaid',
       rtnCode: 0,
       tradeNo:"",
-      paymentDate: getCurrentTaipeiTimeString('Datetime'),
+      MerchantTradeDate: "",
+      paymentDate: "",
       tradeDate: "",
       checkMacValue:"",
       paymentTypeChargeFee:"",
@@ -44,30 +46,33 @@ export class ProductsService {
     return await this.productsRepository.save(newProduct);
     /*
     {
-    "tradeAmt": 10000,
-    "tradeDesc": "測試",
-    "itemName": "iphone6",
-    "merchantID": "WIN20231225164611",
-    "merchantTradeNo": "",
-    "paymentType": "unpaid",
-    "rtnCode": 0,
-    "tradeNo": "",
-    "paymentDate": "2023/12/25 16:46:11",
-    "tradeDate": "",
-    "checkMacValue": "",
-    "paymentTypeChargeFee": "",
-    "id": 3
-}
+        "tradeDesc": "測試",
+        "itemName": "iphone6",
+        "totalAmount": 10000,
+        "merchantID": "",
+        "tradeAmt": 0,
+        "merchantTradeNo": "WIN20231225171435",
+        "paymentType": "unpaid",
+        "rtnCode": 0,
+        "tradeNo": "",
+        "MerchantTradeDate": "",
+        "paymentDate": "",
+        "tradeDate": "",
+        "checkMacValue": "",
+        "paymentTypeChargeFee": "",
+        "id": 1
+    }
     */
   }
   
-  getECPayForm(): string {
+  async getECPayForm(id: number): Promise<string> {
+    const product = await this.productsRepository.findOne({ where : { id } });
     const base_param = {
       MerchantID: () => {
         return `3002607`;
       },
       MerchantTradeNo: () => {
-        return 'WIN' + getCurrentTaipeiTimeString('DatetimeString');
+        return product.merchantTradeNo;
       },
       MerchantTradeDate: () => {
         return getCurrentTaipeiTimeString('Datetime');
@@ -76,13 +81,13 @@ export class ProductsService {
         return `aio`;
       },
       TotalAmount: () => {
-        return 30000;
+        return 1000;
       },
       TradeDesc: () => {
-        return `促銷方案`;
+        return product.tradeDesc;
       },
       ItemName: () => {
-        return `Apple iphone 15`;
+        return product.itemName;
       },
       ReturnURL: () => {
         return process.env.ServerURL+`/result`;
@@ -96,6 +101,14 @@ export class ProductsService {
     };
     const hashKey = process.env.HashKey;
     const hashIV = process.env.HashIV;
+
+    const updatedData = {
+      checkMacValue: generateCheckMacValue(base_param, hashKey, hashIV),
+    };
+
+    const updateProduct = await this.productsRepository.update(id, updatedData);
+
+    console.log(updateProduct);
 
     const form = `
       <form action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="POST" name="payment">
@@ -126,5 +139,10 @@ export class ProductsService {
       }
     }catch(e){
     }
+  }
+
+   // delete
+  async delete(id: number): Promise<void> {
+    await this.productsRepository.delete(id);
   }
 }

@@ -41,4 +41,7 @@ export class Product {
 
   @Column()
   itemName: string;
+
+  @Column()
+  totalAmount: number;
 }
