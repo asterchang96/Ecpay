@@ -8,12 +8,12 @@ export class ProductsController {
 
   @Get('/order')
   getECPayForm(): string {
-    return this.appService.getECPayForm();
+    return this.productsService.getECPayForm();
   }
 
   @Post('/result')
   getECPayResult(@Body() requestBody: any): any {
-    return this.appService.getECPayResult(requestBody);
+    return this.productsService.getECPayResult(requestBody);
   }
   
   @Get()
