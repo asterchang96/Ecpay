@@ -81,7 +81,7 @@ export class ProductsService {
         return `aio`;
       },
       TotalAmount: () => {
-        return 1000;
+        return product.totalAmount;
       },
       TradeDesc: () => {
         return product.tradeDesc;
@@ -90,7 +90,7 @@ export class ProductsService {
         return product.itemName;
       },
       ReturnURL: () => {
-        return process.env.ServerURL+`/result`;
+        return process.env.ServerURL+`/products/order/result`;
       },
       ChoosePayment: () => {
         return `ALL`;
@@ -99,10 +99,12 @@ export class ProductsService {
         return 1;
       },
     };
+    console.log(base_param);
     const hashKey = process.env.HashKey;
     const hashIV = process.env.HashIV;
 
     const updatedData = {
+      merchantID: base_param.MerchantID,
       checkMacValue: generateCheckMacValue(base_param, hashKey, hashIV),
     };
 
@@ -128,21 +130,64 @@ export class ProductsService {
     return form;
   }
 
-  async getECPayResult(req): Promise<any> {
+  async getECPayResult(body): Promise<any> {
+    /*{
+  CustomField1: '',
+  CustomField2: '',
+  CustomField3: '',
+  CustomField4: '',
+  MerchantID: '3002607',
+  MerchantTradeNo: 'WIN20231225175735',
+  PaymentDate: '2023/12/25 18:01:27',
+  PaymentType: 'Credit_CreditCard',
+  PaymentTypeChargeFee: '735',
+  RtnCode: '1',
+  RtnMsg: '交易成功',
+  SimulatePaid: '0',
+  StoreID: '',
+  TradeAmt: '30000',
+  TradeDate: '2023/12/25 18:00:58',
+  TradeNo: '2312251800588618',
+  CheckMacValue: '05486B34B9A60ECB8F73951DD444DB35D576DAD82973C15BCC0CE7DBE8D7C255'
+} */
     try{
-      const { RtnCode, PaymentDate } = req.body;
-      if (RtnCode == 1) {
-        
+      console.log(body);
+      const { RtnCode, PaymentDate, MerchantID, PaymentType, TradeAmt, TradeNo, TradeDate, PaymentTypeChargeFee, MerchantTradeNo } = body;
+      if (RtnCode == '1') {
         //付款成功
+        // 判斷 macValue 是否一樣
+        const product = await this.productsRepository.findOne({ where: { merchantTradeNo:MerchantTradeNo } });
+        const updatedData = {
+          merchantID: MerchantID,
+          rtnCode: parseInt(RtnCode),
+          paymentDate: PaymentDate,
+          paymentType: PaymentType,
+          tradeAmt: parseInt(TradeAmt),
+          tradeNo: TradeNo,
+          tradeDate: TradeDate,
+          paymentTypeChargeFee: PaymentTypeChargeFee,
+        };
+        const updateProduct = await this.productsRepository.update(product.id, updatedData);
+        return updateProduct;
       } else {
         //付款失敗
+        return { error: 'Payment failed.' };
       }
     }catch(e){
+      console.error(e);
+      return { error: 'An error occurred.' };
     }
   }
 
    // delete
-  async delete(id: number): Promise<void> {
-    await this.productsRepository.delete(id);
+  async delete(id: number): Promise<any> {
+    try{
+      const result = await this.productsRepository.delete(id);
+      return result;
+    }catch(e){
+      console.error(e);
+      return { error: 'An error occurred.' };
+    }
+
   }
 }

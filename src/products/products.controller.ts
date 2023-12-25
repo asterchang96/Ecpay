@@ -12,9 +12,10 @@ export class ProductsController {
     return await this.productsService.getECPayForm(id);
   }
 
-  @Post('/result')
-  getECPayResult(@Body() requestBody: any): any {
-    return this.productsService.getECPayResult(requestBody);
+  // ecpay back result to server
+  @Post('/order/result')
+  async getECPayResult(@Body() requestBody: any): Promise<any>  {
+    return await this.productsService.getECPayResult(requestBody);
   }
   
   @Get()
@@ -34,7 +35,7 @@ export class ProductsController {
 
   //delete 
   @Delete(':id')
-  async delete(@Param('id') id: number): Promise<void> {
+  async delete(@Param('id') id: number): Promise<any> {
     const product = await this.productsService.findOne(id);
     if (!product) {
       throw new Error('product not found');
