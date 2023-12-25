@@ -58,6 +58,133 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## API 測試
+1. 建立商品
+```
+POST 127.0.0.1:3000/products
+{
+    "itemName": "iphone9",
+    "totalAmount": 30000,
+    "tradeDesc": "測試"
+}
+```
+預計回傳
+```
+{
+    "tradeDesc": "測試",
+    "itemName": "iphone9",
+    "totalAmount": 30000,
+    "merchantID": "",
+    "tradeAmt": 0,
+    "merchantTradeNo": "WIN20231225181937",
+    "paymentType": "unpaid",
+    "rtnCode": 0,
+    "tradeNo": "",
+    "MerchantTradeDate": "",
+    "paymentDate": "",
+    "tradeDate": "",
+    "checkMacValue": "",
+    "paymentTypeChargeFee": "",
+    "id": 10
+}
+```
+
+2. 建立綠界訂單 - 需透過前端網頁導轉(Submit)到綠界付款API網址。且必須為https URL
+```
+信用卡 4311-9522-2222-2222
+csv 222
+```
+
+交易成功後，綠界會回打API，系統更新資料庫資料。
+
+3.查詢全部資料
+```
+GET 127.0.0.1:3000/products
+```
+
+```
+[
+    {
+        "id": 1,
+        "merchantID": "3002607",
+        "merchantTradeNo": "WIN20231225171435",
+        "paymentDate": "",
+        "paymentType": "unpaid",
+        "rtnCode": 0,
+        "tradeAmt": 0,
+        "tradeNo": "",
+        "tradeDate": "",
+        "checkMacValue": "944C6FF001BEBCB8EB830B994E443C0FA5F64282D82F5F1D4799AF1B0D233E24",
+        "paymentTypeChargeFee": "",
+        "tradeDesc": "測試",
+        "itemName": "iphone6",
+        "totalAmount": 10000
+    },
+    {
+        "id": 9,
+        "merchantID": "3002607",
+        "merchantTradeNo": "WIN20231225181521",
+        "paymentDate": "2023/12/25 18:16:37",
+        "paymentType": "Credit_CreditCard",
+        "rtnCode": 1,
+        "tradeAmt": 30000,
+        "tradeNo": "2312251815368641",
+        "tradeDate": "2023/12/25 18:15:36",
+        "checkMacValue": "D6EA87E47DFCB150E5C45B6F5B9C55A2E136388C033EE4D6F046A34013E2F0BD",
+        "paymentTypeChargeFee": "735",
+        "tradeDesc": "測試",
+        "itemName": "iphone9",
+        "totalAmount": 30000
+    },
+    {
+        "id": 10,
+        "merchantID": "3002607",
+        "merchantTradeNo": "WIN20231225181937",
+        "paymentDate": "2023/12/25 18:20:32",
+        "paymentType": "Credit_CreditCard",
+        "rtnCode": 1,
+        "tradeAmt": 30000,
+        "tradeNo": "2312251819518648",
+        "tradeDate": "2023/12/25 18:19:51",
+        "checkMacValue": "1DC5922A99E446E34CB349E07B513DA2080390A4CCB75FD15D0504442B7DCE33",
+        "paymentTypeChargeFee": "735",
+        "tradeDesc": "測試",
+        "itemName": "iphone9",
+        "totalAmount": 30000
+    }
+]
+```
+
+3.查詢單筆資料
+```
+GET 127.0.0.1:3000/products/:id
+```
+```
+{
+    "id": 10,
+    "merchantID": "3002607",
+    "merchantTradeNo": "WIN20231225181937",
+    "paymentDate": "2023/12/25 18:20:32",
+    "paymentType": "Credit_CreditCard",
+    "rtnCode": 1,
+    "tradeAmt": 30000,
+    "tradeNo": "2312251819518648",
+    "tradeDate": "2023/12/25 18:19:51",
+    "checkMacValue": "1DC5922A99E446E34CB349E07B513DA2080390A4CCB75FD15D0504442B7DCE33",
+    "paymentTypeChargeFee": "735",
+    "tradeDesc": "測試",
+    "itemName": "iphone9",
+    "totalAmount": 30000
+}
+```
+
+4.刪除某筆資料
+```
+DELETE 127.0.0.1:3000/products/4
+```
+
+
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
