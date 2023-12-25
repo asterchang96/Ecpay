@@ -1,26 +1,41 @@
+// app.module.ts
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProductsModule } from './products/products.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    ProductsModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'production' ? '.env.prod' : '.env',
+    }),
     TypeOrmModule.forRoot({
-      type: process.env.DB_TYPE as any,
+      type: 'postgres',
       host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
+      port: parseInt(process.env.DB_PORT), // PostgreSQL 默認端口
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [__dirname, '**', '*.entity.{ts,js}'],
       synchronize: true, // 在開發環境中使用，生產環境中應該關閉
     }),
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    console.log('AppModule initialized');
+    console.log('DB_HOST:', process.env.DB_HOST);
+    console.log('DB_USER:', process.env.DB_USER);
+    console.log('DB_PASSWORD:', process.env.DB_PASSWORD);
+    console.log('DB_DATABASE:', process.env.DB_DATABASE);
+  }
+}

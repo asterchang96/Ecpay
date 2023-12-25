@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
 
 @Entity()
 export class Product {
@@ -30,30 +31,27 @@ export class Product {
   tradeDate: string;
 
   @Column()
-  CheckMacValue: string;
+  checkMacValue: string;
 
   @Column()
-  PaymentTypeChargeFee: string;
+  paymentTypeChargeFee: string;
 
   @Column()
-  SimulatePaid: number;
+  simulatePaid: number;
 
   @Column()
-  PaymentType: string;
+  tradeDesc: string;
 
   @Column()
-  TradeDesc: string;
+  itemName: string;
 
   @Column()
-  ItemName: string;
+  returnURL: string; //default: process.env.ServerURL+`/result`
 
   @Column()
-  ReturnURL: string; //default: process.env.ServerURL+`/result`
+  choosePayment: string; //default:ALL
 
   @Column()
-  ChoosePayment: string; //default:ALL
-
-  @Column()
-  EncryptType: number; //default:1
+  encryptType: number; //default:1
 
 }
