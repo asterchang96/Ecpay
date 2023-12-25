@@ -6,12 +6,22 @@ import { Product } from './product.entity';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService){}
 
+  @Get('/order')
+  getECPayForm(): string {
+    return this.appService.getECPayForm();
+  }
+
+  @Post('/result')
+  getECPayResult(@Body() requestBody: any): any {
+    return this.appService.getECPayResult(requestBody);
+  }
+  
   @Get()
   async findAll(): Promise<Product[]> {
     return await this.productsService.findAll();
   }
 
-  @Get()
+  @Get(':id')
   async findOne(@Param('id') id: number): Promise<Product> {
     const product = await this.productsService.findOne(id);
     if(!product){
@@ -25,5 +35,5 @@ export class ProductsController {
   async create(@Body() product: Product): Promise<Product> {
     return await this.productsService.create(product);
   }
-
+  
 }

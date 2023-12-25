@@ -2,6 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './product.entity';
+import { Injectable } from '@nestjs/common';
+import {
+  getCurrentTaipeiTimeString,
+  generateCheckMacValue,
+} from '../../utils/index';
 
 @Injectable()
 export class ProductsService {
@@ -24,4 +29,57 @@ export class ProductsService {
     return await this.productsRepository.save(newProduct);
   }
   
+  async getECPayForm(): any {
+    const base_param = {
+      MerchantID: () => {
+        return `3002607`;
+      },
+      MerchantTradeNo: () => {
+        return 'WIN' + getCurrentTaipeiTimeString('DatetimeString');
+      },
+      MerchantTradeDate: () => {
+        return getCurrentTaipeiTimeString('Datetime');
+      },
+      PaymentType: () => {
+        return `aio`;
+      },
+      TotalAmount: () => {
+        return 30000;
+      },
+      TradeDesc: () => {
+        return `促銷方案`;
+      },
+      ItemName: () => {
+        return `Apple iphone 15`;
+      },
+      ReturnURL: () => {
+        return process.env.ServerURL+`/result`;
+      },
+      ChoosePayment: () => {
+        return `ALL`;
+      },
+      EncryptType: () => {
+        return 1;
+      },
+    };
+    const hashKey = process.env.HashKey;
+    const hashIV = process.env.HashIV;
+
+    const form = `
+      <form action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="POST" name="payment">
+      <input name="MerchantID" style="display: none;" value="${base_param.MerchantID()}" />
+      <input name="MerchantTradeNo" style="display: none;" value="${base_param.MerchantTradeNo()}"/>
+      MerchantTradeDate <input name="MerchantTradeDate" value="${base_param.MerchantTradeDate()}" /></br>
+      <input name="PaymentType" style="display: none;" value="${base_param.PaymentType()}" />
+      TotalAmount <input name="TotalAmount" value=${base_param.TotalAmount()} /></br>
+      TradeDesc <input name="TradeDesc" value="${base_param.TradeDesc()}" /></br>
+      ItemName <input name="ItemName" value="${base_param.ItemName()}" /></br>
+      <input name="ReturnURL" style="display: none;"value="${base_param.ReturnURL()}" />
+      <input name="ChoosePayment" style="display: none;" value="${base_param.ChoosePayment()}" />
+      <input name="EncryptType" style="display: none;" value=${base_param.EncryptType()} />
+      <input name="CheckMacValue" style="display: none;" value="${generateCheckMacValue(base_param, hashKey, hashIV)}" /></br>
+      <button type="submit">Submit</button>
+      </form>`;
+    return form;
+  }
 }
