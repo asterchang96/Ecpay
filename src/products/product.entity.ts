@@ -37,21 +37,8 @@ export class Product {
   paymentTypeChargeFee: string;
 
   @Column()
-  simulatePaid: number;
-
-  @Column()
   tradeDesc: string;
 
   @Column()
   itemName: string;
-
-  @Column()
-  returnURL: string; //default: process.env.ServerURL+`/result`
-
-  @Column()
-  choosePayment: string; //default:ALL
-
-  @Column()
-  encryptType: number; //default:1
-
 }

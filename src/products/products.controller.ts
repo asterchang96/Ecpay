@@ -31,6 +31,8 @@ export class ProductsController {
     }
   }
 
+
+  // 建立訂單
   @Post()
   async create(@Body() product: Product): Promise<Product> {
     return await this.productsService.create(product);

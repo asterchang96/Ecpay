@@ -24,8 +24,41 @@ export class ProductsService {
 
 
   async create(product: Product): Promise<Product> {
+
+    // 必填欄位
     const newProduct = await this.productsRepository.create(product);
+    // itemName、tradeAmt、tradeDesc
+    // 補上欄位
+    Object.assign(newProduct, {
+      merchantID: 'WIN' + getCurrentTaipeiTimeString('DatetimeString'),
+      merchantTradeNo: '',
+      paymentType: 'unpaid',
+      rtnCode: 0,
+      tradeNo:"",
+      paymentDate: getCurrentTaipeiTimeString('Datetime'),
+      tradeDate: "",
+      checkMacValue:"",
+      paymentTypeChargeFee:"",
+    });
+
     return await this.productsRepository.save(newProduct);
+    /*
+    {
+    "tradeAmt": 10000,
+    "tradeDesc": "測試",
+    "itemName": "iphone6",
+    "merchantID": "WIN20231225164611",
+    "merchantTradeNo": "",
+    "paymentType": "unpaid",
+    "rtnCode": 0,
+    "tradeNo": "",
+    "paymentDate": "2023/12/25 16:46:11",
+    "tradeDate": "",
+    "checkMacValue": "",
+    "paymentTypeChargeFee": "",
+    "id": 3
+}
+    */
   }
   
   getECPayForm(): string {
