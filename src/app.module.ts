@@ -1,4 +1,3 @@
-// app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -22,7 +21,8 @@ dotenv.config();
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [__dirname, '**', '*.entity.{ts,js}'],
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      // entities: [__dirname, '**', '*.entity.{ts,js}'],
       synchronize: true, // 在開發環境中使用，生產環境中應該關閉
     }),
     ProductsModule,

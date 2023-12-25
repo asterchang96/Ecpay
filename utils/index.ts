@@ -1,4 +1,4 @@
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 import * as crypto from 'crypto';
 
 export function getCurrentTaipeiTimeString(
