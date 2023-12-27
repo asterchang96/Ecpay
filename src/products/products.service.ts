@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './product.entity';
@@ -99,7 +99,7 @@ export class ProductsService {
         return 1;
       },
     };
-    console.log(base_param);
+    Logger.log(base_param);
     const hashKey = process.env.HashKey;
     const hashIV = process.env.HashIV;
 
@@ -110,7 +110,7 @@ export class ProductsService {
 
     const updateProduct = await this.productsRepository.update(id, updatedData);
 
-    console.log(updateProduct);
+    Logger.log(updateProduct);
 
     const form = `
       <form action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="POST" name="payment">
@@ -151,7 +151,7 @@ export class ProductsService {
   CheckMacValue: '05486B34B9A60ECB8F73951DD444DB35D576DAD82973C15BCC0CE7DBE8D7C255'
 } */
     try{
-      console.log(body);
+      Logger.log(body);
       const { RtnCode, PaymentDate, MerchantID, PaymentType, TradeAmt, TradeNo, TradeDate, PaymentTypeChargeFee, MerchantTradeNo } = body;
       if (RtnCode == '1') {
         //付款成功
@@ -174,7 +174,7 @@ export class ProductsService {
         return { error: 'Payment failed.' };
       }
     }catch(e){
-      console.error(e);
+      Logger.error(e);
       return { error: 'An error occurred.' };
     }
   }
@@ -185,7 +185,7 @@ export class ProductsService {
       const result = await this.productsRepository.delete(id);
       return result;
     }catch(e){
-      console.error(e);
+      Logger.error(e);
       return { error: 'An error occurred.' };
     }
 

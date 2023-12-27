@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -32,10 +32,10 @@ dotenv.config();
 })
 export class AppModule {
   constructor() {
-    console.log('AppModule initialized');
-    console.log('DB_HOST:', process.env.DB_HOST);
-    console.log('DB_USER:', process.env.DB_USER);
-    console.log('DB_PASSWORD:', process.env.DB_PASSWORD);
-    console.log('DB_DATABASE:', process.env.DB_DATABASE);
+    Logger.log('AppModule initialized');
+    Logger.log('DB_HOST:', process.env.DB_HOST);
+    Logger.log('DB_USER:', process.env.DB_USER);
+    Logger.log('DB_PASSWORD:', process.env.DB_PASSWORD);
+    Logger.log('DB_DATABASE:', process.env.DB_DATABASE);
   }
 }
