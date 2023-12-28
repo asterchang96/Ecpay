@@ -25,12 +25,12 @@ export function getCurrentTaipeiTimeString(
 
 
 export function generateCheckMacValue(
-  base_param: any,
-  HashKey: string,
-  HashIV: string,
+  baseParam: any,
+  hashKey: string,
+  hashIV: string,
   ) {
 
-    let checkValue = `HashKey=${HashKey}&ChoosePayment=${base_param.ChoosePayment()}&EncryptType=${base_param.EncryptType()}&ItemName=${base_param.ItemName()}&MerchantID=${base_param.MerchantID()}&MerchantTradeDate=${base_param.MerchantTradeDate()}&MerchantTradeNo=${base_param.MerchantTradeNo()}&PaymentType=${base_param.PaymentType()}&ReturnURL=${base_param.ReturnURL()}&TotalAmount=${base_param.TotalAmount()}&TradeDesc=${base_param.TradeDesc()}&HashIV=${HashIV}`;
+    let checkValue = `HashKey=${hashKey}&ChoosePayment=${baseParam.ChoosePayment()}&EncryptType=${baseParam.EncryptType()}&ItemName=${baseParam.ItemName()}&MerchantID=${baseParam.MerchantID()}&MerchantTradeDate=${baseParam.MerchantTradeDate()}&MerchantTradeNo=${baseParam.MerchantTradeNo()}&PaymentType=${baseParam.PaymentType()}&ReturnURL=${baseParam.ReturnURL()}&TotalAmount=${baseParam.TotalAmount()}&TradeDesc=${baseParam.TradeDesc()}&HashIV=${hashIV}`;
 
   checkValue = encodeURIComponent(checkValue).toLowerCase();
   

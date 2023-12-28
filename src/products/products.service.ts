@@ -36,7 +36,7 @@ export class ProductsService {
       paymentType: 'unpaid',
       rtnCode: 0,
       tradeNo:"",
-      MerchantTradeDate: "",
+      merchantTradeDate: "",
       paymentDate: "",
       tradeDate: "",
       checkMacValue:"",
@@ -55,7 +55,7 @@ export class ProductsService {
         "paymentType": "unpaid",
         "rtnCode": 0,
         "tradeNo": "",
-        "MerchantTradeDate": "",
+        "merchantTradeDate": "",
         "paymentDate": "",
         "tradeDate": "",
         "checkMacValue": "",
@@ -67,7 +67,7 @@ export class ProductsService {
   
   async getECPayForm(id: number): Promise<string> {
     const product = await this.productsRepository.findOne({ where : { id } });
-    const base_param = {
+    const baseParam = {
       MerchantID: () => {
         return `3002607`;
       },
@@ -99,13 +99,13 @@ export class ProductsService {
         return 1;
       },
     };
-    Logger.log(base_param);
+    Logger.log(baseParam);
     const hashKey = process.env.HashKey;
     const hashIV = process.env.HashIV;
 
     const updatedData = {
-      merchantID: base_param.MerchantID,
-      checkMacValue: generateCheckMacValue(base_param, hashKey, hashIV),
+      merchantID: baseParam.MerchantID,
+      checkMacValue: generateCheckMacValue(baseParam, hashKey, hashIV),
     };
 
     const updateProduct = await this.productsRepository.update(id, updatedData);
@@ -114,17 +114,17 @@ export class ProductsService {
 
     const form = `
       <form action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="POST" name="payment">
-      <input name="MerchantID" style="display: none;" value="${base_param.MerchantID()}" />
-      <input name="MerchantTradeNo" style="display: none;" value="${base_param.MerchantTradeNo()}"/>
-      MerchantTradeDate <input name="MerchantTradeDate" value="${base_param.MerchantTradeDate()}" /></br>
-      <input name="PaymentType" style="display: none;" value="${base_param.PaymentType()}" />
-      TotalAmount <input name="TotalAmount" value=${base_param.TotalAmount()} /></br>
-      TradeDesc <input name="TradeDesc" value="${base_param.TradeDesc()}" /></br>
-      ItemName <input name="ItemName" value="${base_param.ItemName()}" /></br>
-      <input name="ReturnURL" style="display: none;"value="${base_param.ReturnURL()}" />
-      <input name="ChoosePayment" style="display: none;" value="${base_param.ChoosePayment()}" />
-      <input name="EncryptType" style="display: none;" value=${base_param.EncryptType()} />
-      <input name="CheckMacValue" style="display: none;" value="${generateCheckMacValue(base_param, hashKey, hashIV)}" /></br>
+      <input name="MerchantID" style="display: none;" value="${baseParam.MerchantID()}" />
+      <input name="MerchantTradeNo" style="display: none;" value="${baseParam.MerchantTradeNo()}"/>
+      MerchantTradeDate <input name="MerchantTradeDate" value="${baseParam.MerchantTradeDate()}" /></br>
+      <input name="PaymentType" style="display: none;" value="${baseParam.PaymentType()}" />
+      TotalAmount <input name="TotalAmount" value=${baseParam.TotalAmount()} /></br>
+      TradeDesc <input name="TradeDesc" value="${baseParam.TradeDesc()}" /></br>
+      ItemName <input name="ItemName" value="${baseParam.ItemName()}" /></br>
+      <input name="ReturnURL" style="display: none;"value="${baseParam.ReturnURL()}" />
+      <input name="ChoosePayment" style="display: none;" value="${baseParam.ChoosePayment()}" />
+      <input name="EncryptType" style="display: none;" value=${baseParam.EncryptType()} />
+      <input name="CheckMacValue" style="display: none;" value="${generateCheckMacValue(baseParam, hashKey, hashIV)}" /></br>
       <button type="submit">Submit</button>
       </form>`;
     return form;
