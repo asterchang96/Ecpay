@@ -39,7 +39,7 @@ export class Product {
   @Column({ default: "" })
   paymentTypeChargeFee: string;
 
-  @Column({ default: "" })
+  @Column()
   tradeDesc: string;
 
   @Column()

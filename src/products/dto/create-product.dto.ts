@@ -16,6 +16,7 @@ export class CreateProductDto {
 
 
   // product description (opt.) null-200
+  @IsNotEmpty()
   @MaxLength(200, { message: 'itemName should not exceed 200 characters' })
   readonly tradeDesc: string;
 

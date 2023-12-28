@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './product.entity';
@@ -17,57 +17,50 @@ export class ProductsService {
   ){}
 
 
-
   async findAll(): Promise<Product[]> {
     return await this.productsRepository.find();
   }
 
   async findOne(id: number): Promise<Product> {
-    return await this.productsRepository.findOne({ where : { id } });
+    const product = await this.productsRepository.findOne({ where: { id } });
+
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    return product;
   }
+
 
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
     const newProduct = this.productsRepository.create(createProductDto);
-    console.log(newProduct);
     return await this.productsRepository.save(newProduct);
   }
   
   async getECPayForm(id: number): Promise<string> {
-    const product = await this.productsRepository.findOne({ where : { id } });
+    const product = await this.productsRepository.findOne({ where: { id } });
+
+    if (!product) {
+      this.logger.error(`Product with ID ${id} not found.`);
+      throw new Error(`Product with ID ${id} not found.`);
+    }
+
     const baseParam = {
-      MerchantID: () => {
-        return `3002607`;
-      },
-      MerchantTradeNo: () => {
-        return 'WIN' + getCurrentTaipeiTimeString('DatetimeString');
-      },
-      MerchantTradeDate: () => {
-        return getCurrentTaipeiTimeString('Datetime');
-      },
-      PaymentType: () => {
-        return `aio`;
-      },
-      TotalAmount: () => {
-        return product.totalAmount;
-      },
-      TradeDesc: () => {
-        return product.tradeDesc;
-      },
-      ItemName: () => {
-        return product.itemName;
-      },
-      ReturnURL: () => {
-        return process.env.ServerURL+`/products/order/result`;
-      },
-      ChoosePayment: () => {
-        return `ALL`;
-      },
-      EncryptType: () => {
-        return 1;
-      },
+      MerchantID: '3002607',
+      MerchantTradeNo: 'WIN' + getCurrentTaipeiTimeString('DatetimeString'),
+      MerchantTradeDate: getCurrentTaipeiTimeString('Datetime'),
+      PaymentType: 'aio',
+      TotalAmount: product.totalAmount,
+      TradeDesc: product.tradeDesc,
+      ItemName: product.itemName,
+      ReturnURL: `${process.env.ServerURL}/products/order/result`,
+      ChoosePayment: 'ALL',
+      EncryptType: 1,
     };
+
     this.logger.log(baseParam);
+
     const hashKey = process.env.HashKey;
     const hashIV = process.env.HashIV;
 
@@ -78,24 +71,24 @@ export class ProductsService {
     };
 
     const updateProduct = await this.productsRepository.update(id, updatedData);
-
     this.logger.log(updateProduct);
 
     const form = `
       <form action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="POST" name="payment">
-      <input name="MerchantID" style="display: none;" value="${baseParam.MerchantID()}" />
-      <input name="MerchantTradeNo" style="display: none;" value="${baseParam.MerchantTradeNo()}"/>
-      MerchantTradeDate <input name="MerchantTradeDate" value="${baseParam.MerchantTradeDate()}" /></br>
-      <input name="PaymentType" style="display: none;" value="${baseParam.PaymentType()}" />
-      TotalAmount <input name="TotalAmount" value=${baseParam.TotalAmount()} /></br>
-      TradeDesc <input name="TradeDesc" value="${baseParam.TradeDesc()}" /></br>
-      ItemName <input name="ItemName" value="${baseParam.ItemName()}" /></br>
-      <input name="ReturnURL" style="display: none;"value="${baseParam.ReturnURL()}" />
-      <input name="ChoosePayment" style="display: none;" value="${baseParam.ChoosePayment()}" />
-      <input name="EncryptType" style="display: none;" value=${baseParam.EncryptType()} />
+      <input name="MerchantID" style="display: none;" value="${baseParam.MerchantID}" />
+      <input name="MerchantTradeNo" style="display: none;" value="${baseParam.MerchantTradeNo}"/>
+      MerchantTradeDate <input name="MerchantTradeDate" value="${baseParam.MerchantTradeDate}" /></br>
+      <input name="PaymentType" style="display: none;" value="${baseParam.PaymentType}" />
+      TotalAmount <input name="TotalAmount" value=${baseParam.TotalAmount} /></br>
+      TradeDesc <input name="TradeDesc" value="${baseParam.TradeDesc}" /></br>
+      ItemName <input name="ItemName" value="${baseParam.ItemName}" /></br>
+      <input name="ReturnURL" style="display: none;"value="${baseParam.ReturnURL}" />
+      <input name="ChoosePayment" style="display: none;" value="${baseParam.ChoosePayment}" />
+      <input name="EncryptType" style="display: none;" value=${baseParam.EncryptType} />
       <input name="CheckMacValue" style="display: none;" value="${generateCheckMacValue(baseParam, hashKey, hashIV)}" /></br>
       <button type="submit">Submit</button>
       </form>`;
+
     return form;
   }
 
