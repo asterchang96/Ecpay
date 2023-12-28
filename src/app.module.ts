@@ -31,11 +31,12 @@ dotenv.config();
   providers: [AppService],
 })
 export class AppModule {
+  private readonly logger: Logger = new Logger(AppModule.name);
   constructor() {
-    Logger.log('AppModule initialized');
-    Logger.log('DB_HOST:', process.env.DB_HOST);
-    Logger.log('DB_USER:', process.env.DB_USER);
-    Logger.log('DB_PASSWORD:', process.env.DB_PASSWORD);
-    Logger.log('DB_DATABASE:', process.env.DB_DATABASE);
+    this.logger.log('AppModule initialized');
+    this.logger.log('DB_HOST:', process.env.DB_HOST);
+    this.logger.log('DB_USER:', process.env.DB_USER);
+    this.logger.log('DB_PASSWORD:', process.env.DB_PASSWORD);
+    this.logger.log('DB_DATABASE:', process.env.DB_DATABASE);
   }
 }
