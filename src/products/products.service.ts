@@ -6,6 +6,7 @@ import {
   getCurrentTaipeiTimeString,
   generateCheckMacValue,
 } from '../../utils/index';
+import { CreateProductDto } from './dto/create-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -13,7 +14,6 @@ export class ProductsService {
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
   ){}
-  
   async findAll(): Promise<Product[]> {
     return await this.productsRepository.find();
   }
@@ -23,46 +23,10 @@ export class ProductsService {
   }
 
 
-  async create(product: Product): Promise<Product> {
-
-    // 必填欄位
-    const newProduct = await this.productsRepository.create(product);
-    // itemName、totalAmount、tradeDesc
-    // 補上欄位
-    Object.assign(newProduct, {
-      merchantID: '',
-      tradeAmt:0,
-      merchantTradeNo: 'WIN' + getCurrentTaipeiTimeString('DatetimeString'),
-      paymentType: 'unpaid',
-      rtnCode: 0,
-      tradeNo:"",
-      merchantTradeDate: "",
-      paymentDate: "",
-      tradeDate: "",
-      checkMacValue:"",
-      paymentTypeChargeFee:"",
-    });
-
+  async create(createProductDto: CreateProductDto): Promise<Product> {
+    const newProduct = this.productsRepository.create(createProductDto);
+    console.log(newProduct);
     return await this.productsRepository.save(newProduct);
-    /*
-    {
-        "tradeDesc": "測試",
-        "itemName": "iphone6",
-        "totalAmount": 10000,
-        "merchantID": "",
-        "tradeAmt": 0,
-        "merchantTradeNo": "WIN20231225171435",
-        "paymentType": "unpaid",
-        "rtnCode": 0,
-        "tradeNo": "",
-        "merchantTradeDate": "",
-        "paymentDate": "",
-        "tradeDate": "",
-        "checkMacValue": "",
-        "paymentTypeChargeFee": "",
-        "id": 1
-    }
-    */
   }
   
   async getECPayForm(id: number): Promise<string> {
@@ -72,7 +36,7 @@ export class ProductsService {
         return `3002607`;
       },
       MerchantTradeNo: () => {
-        return product.merchantTradeNo;
+        return 'WIN' + getCurrentTaipeiTimeString('DatetimeString');
       },
       MerchantTradeDate: () => {
         return getCurrentTaipeiTimeString('Datetime');
@@ -105,6 +69,7 @@ export class ProductsService {
 
     const updatedData = {
       merchantID: baseParam.MerchantID,
+      merchantTradeNo: baseParam.MerchantTradeNo,
       checkMacValue: generateCheckMacValue(baseParam, hashKey, hashIV),
     };
 

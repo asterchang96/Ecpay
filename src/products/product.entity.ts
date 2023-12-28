@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { IsInt } from 'class-validator';
 
 
 @Entity()
@@ -6,37 +7,39 @@ export class Product {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ default: "" })
   merchantID: String;
 
-  @Column()
+  @Column({ default: "" })
   merchantTradeNo: String;
 
-  @Column()
+  @Column({ default: "" })
   paymentDate: String;
 
-  @Column()
+  @Column({ default: "unpaid" })
   paymentType: String; // default :unpaid -> Credit_CreditCard
 
-  @Column()
+  @Column({ default: 0 })
+  @IsInt({ message: 'rtnCode must be an integer in entity.' })
   rtnCode: number; //交易是否成功(1 成功) > RtnMsg: '交易成功'
 
-  @Column()
+  @Column({ default: 0 })
+  @IsInt({ message: 'tradeAmt must be an integer in entity.' })
   tradeAmt: number; // 交易金額
 
-  @Column()
+  @Column({ default: "" })
   tradeNo: string;
 
-  @Column()
+  @Column({ default: "" })
   tradeDate: string;
 
-  @Column()
+  @Column({ default: "" })
   checkMacValue: string;
 
-  @Column()
+  @Column({ default: "" })
   paymentTypeChargeFee: string;
 
-  @Column()
+  @Column({ default: "" })
   tradeDesc: string;
 
   @Column()
