@@ -21,7 +21,7 @@ export class Product {
 
   @Column({ default: 0 })
   @IsInt({ message: 'rtnCode must be an integer in entity.' })
-  rtnCode: number; //交易是否成功(1 成功) > RtnMsg: '交易成功'
+  rtnCode: number; //交易是否成功(1 成功) > RtnMsg: '交易成功'，其餘都失敗(0:尚未交易)
 
   @Column({ default: 0 })
   @IsInt({ message: 'tradeAmt must be an integer in entity.' })

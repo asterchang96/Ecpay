@@ -14,7 +14,7 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
-  ){}
+  ) { }
 
 
   async findAll(): Promise<Product[]> {
@@ -37,7 +37,7 @@ export class ProductsService {
     const newProduct = this.productsRepository.create(createProductDto);
     return await this.productsRepository.save(newProduct);
   }
-  
+
   async getECPayForm(id: number): Promise<string> {
     const product = await this.productsRepository.findOne({ where: { id } });
 
@@ -63,11 +63,12 @@ export class ProductsService {
 
     const hashKey = process.env.HashKey;
     const hashIV = process.env.HashIV;
+    const checkMacValue = generateCheckMacValue(baseParam, hashKey, hashIV);
 
     const updatedData = {
       merchantID: baseParam.MerchantID,
       merchantTradeNo: baseParam.MerchantTradeNo,
-      checkMacValue: generateCheckMacValue(baseParam, hashKey, hashIV),
+      checkMacValue: checkMacValue,
     };
 
     const updateProduct = await this.productsRepository.update(id, updatedData);
@@ -85,7 +86,7 @@ export class ProductsService {
       <input name="ReturnURL" style="display: none;"value="${baseParam.ReturnURL}" />
       <input name="ChoosePayment" style="display: none;" value="${baseParam.ChoosePayment}" />
       <input name="EncryptType" style="display: none;" value=${baseParam.EncryptType} />
-      <input name="CheckMacValue" style="display: none;" value="${generateCheckMacValue(baseParam, hashKey, hashIV)}" /></br>
+      <input name="CheckMacValue" style="display: none;" value="${checkMacValue}" /></br>
       <button type="submit">Submit</button>
       </form>`;
 
@@ -93,32 +94,32 @@ export class ProductsService {
   }
 
   async getECPayResult(body): Promise<any> {
-    /*{
-  CustomField1: '',
-  CustomField2: '',
-  CustomField3: '',
-  CustomField4: '',
-  MerchantID: '3002607',
-  MerchantTradeNo: 'WIN20231225175735',
-  PaymentDate: '2023/12/25 18:01:27',
-  PaymentType: 'Credit_CreditCard',
-  PaymentTypeChargeFee: '735',
-  RtnCode: '1',
-  RtnMsg: '交易成功',
-  SimulatePaid: '0',
-  StoreID: '',
-  TradeAmt: '30000',
-  TradeDate: '2023/12/25 18:00:58',
-  TradeNo: '2312251800588618',
-  CheckMacValue: '05486B34B9A60ECB8F73951DD444DB35D576DAD82973C15BCC0CE7DBE8D7C255'
-} */
-    try{
+    try {
       this.logger.log(body);
-      const { RtnCode, PaymentDate, MerchantID, PaymentType, TradeAmt, TradeNo, TradeDate, PaymentTypeChargeFee, MerchantTradeNo } = body;
-      if (RtnCode == '1') {
-        //付款成功
-        // 判斷 macValue 是否一樣
-        const product = await this.productsRepository.findOne({ where: { merchantTradeNo:MerchantTradeNo } });
+
+      const { RtnCode, PaymentDate, MerchantID, PaymentType, TradeAmt, TradeNo, TradeDate, PaymentTypeChargeFee, MerchantTradeNo, CheckMacValue } = body;
+
+      const product = await this.productsRepository.findOne({ where: { merchantTradeNo: MerchantTradeNo } });
+      this.logger.log(product);
+
+
+      // 交易不成功
+      if (RtnCode !== '1') {
+        const updatedData = {
+          merchantID: MerchantID,
+          rtnCode: parseInt(RtnCode),
+        };
+        const updateProduct = await this.productsRepository.update(product.id, updatedData);
+        this.logger.log(updateProduct);
+        return { success: false, error: 'RtnCode is not 1.' };
+      }
+
+      // 找不到商品
+      if (!product) {
+        this.logger.error(`Product with MerchantTradeNo ${MerchantTradeNo} not found.`);
+        throw new Error(`Product with MerchantTradeNo ${MerchantTradeNo} not found.`);
+      }
+      else{
         const updatedData = {
           merchantID: MerchantID,
           rtnCode: parseInt(RtnCode),
@@ -131,24 +132,23 @@ export class ProductsService {
         };
         const updateProduct = await this.productsRepository.update(product.id, updatedData);
         return updateProduct;
-      } else {
-        //付款失敗
-        return { error: 'Payment failed.' };
       }
-    }catch(e){
+
+    } catch (e) {
       this.logger.error(e);
       return { error: 'An error occurred.' };
     }
   }
 
-   // delete
+  // delete
   async delete(id: number): Promise<any> {
-    try{
+    try {
       const result = await this.productsRepository.delete(id);
-      return result;
-    }catch(e){
+      this.logger.log(`Product with ID ${id} deleted successfully.`);
+      return { message: `Product with ID ${id} deleted successfully.`, statusCode: 200 };
+    } catch (e) {
       this.logger.error(e);
-      return { error: 'An error occurred.' };
+      return { error: 'An error occurred while deleting the product.', statusCode: 500 };
     }
 
   }

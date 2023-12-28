@@ -45,3 +45,4 @@ export function generateCheckMacValue(
   const hash = crypto.createHash('sha256').update(normalizedValue).digest('hex');
   return hash.toUpperCase();
 }
+
