@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-// import { ProductRepository } from './product.repository';
+import { ProductRepository } from './product.repository';
 import { Product } from './product.entity';
 import { getCurrentTaipeiTimeString } from '../../utils/getCurrentTaipeiTimeString';
 import { generateCheckMacValue } from '../../utils/generateCheckMacValue';
@@ -18,13 +18,13 @@ export class ProductsService {
   private readonly logger: Logger = new Logger(ProductsService.name);
   constructor(
     @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>,
+    private readonly productRepository: ProductRepository,
   ) {}
 
   async findAll(): Promise<Product[]> {
     try {
       this.logger.log('Attempting to fetch products...');
-      const products = await this.productRepository.find();
+      const products = await this.productRepository.findAllProduct();
       this.logger.log('Products fetched successfully:', products);
       return products;
     } catch (error) {
@@ -120,11 +120,8 @@ export class ProductsService {
         MerchantTradeNo,
       } = payload;
 
-      // const product =
-      //   await this.productRepository.findByMerchantTradeNo(MerchantTradeNo);
-      const product = await this.productRepository.findOne({
-        where: { merchantTradeNo: MerchantTradeNo },
-      });
+      const product =
+        await this.productRepository.findByMerchantTradeNo(MerchantTradeNo);
       this.logger.log(product);
 
       // 交易不成功
