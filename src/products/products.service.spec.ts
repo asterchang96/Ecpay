@@ -95,7 +95,6 @@ describe('ProductsService', () => {
     }
   });
 
-
   it('should throw NotFoundException if product with ID is not found', async () => {
     const nonExistentProductId = 10;
 
