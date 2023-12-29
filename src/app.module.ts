@@ -15,6 +15,7 @@ dotenv.config();
       envFilePath: process.env.NODE_ENV === 'production' ? '.env.prod' : '.env',
     }),
     TypeOrmModule.forRoot({
+      logging: true,
       type: 'postgres',
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT), // PostgreSQL 默認端口

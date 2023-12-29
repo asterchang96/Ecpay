@@ -1,7 +1,7 @@
 import moment from 'moment-timezone';
 
 export function getCurrentTaipeiTimeString(
-  format?: 'DatetimeString' | 'Datetime',
+  format?: 'dateTimeString' | 'dateTime',
 ) {
   const taipeiTime = moment(Date.now()).tz('Asia/Taipei');
   const date = taipeiTime.format('YYYY/MM/DD HH:mm:ss');
@@ -15,9 +15,9 @@ export function getCurrentTaipeiTimeString(
     taipeiTime.seconds(),
   ].map((value) => `${value}`.padStart(2, '0'));
 
-  return format === 'DatetimeString'
+  return format === 'dateTimeString'
     ? `${year}${month}${day}${hour}${minute}${second}`
-    : format === 'Datetime'
+    : format === 'dateTime'
       ? date
       : `${year}/${month}/${day} ${hour}:${minute}:${second}`;
 }

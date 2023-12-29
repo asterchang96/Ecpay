@@ -65,4 +65,22 @@ export interface UpdateECPayResultDto {
   checkMacValue?: string;
 }
 
-export interface findAllModel {}
+// 更新產生訂單資料
+export interface UpdateECPayOrderDto {
+  merchantID: string;
+  merchantTradeNo: string;
+  checkMacValue: string;
+}
+
+export interface ECPayBaseParamsDto {
+  MerchantID: string;
+  MerchantTradeNo: string;
+  MerchantTradeDate: string;
+  PaymentType: string;
+  TotalAmount: number;
+  TradeDesc: string;
+  ItemName: string;
+  ReturnURL: string;
+  ChoosePayment: string;
+  EncryptType: number;
+}

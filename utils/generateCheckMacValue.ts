@@ -1,7 +1,8 @@
 import * as crypto from 'crypto';
+import { ECPayBaseParamsDto } from '../src/products/product.dto';
 
 export function generateCheckMacValue(
-  baseParam: any,
+  baseParam: ECPayBaseParamsDto,
   hashKey: string,
   hashIV: string,
 ): string {
