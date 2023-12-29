@@ -2,10 +2,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductRepository } from './product.repository';
 import { Product } from './product.entity';
-import {
-  getCurrentTaipeiTimeString,
-  generateCheckMacValue,
-} from '../../utils/index';
+import { getCurrentTaipeiTimeString } from '../../utils/getCurrentTaipeiTimeString';
+import { generateCheckMacValue } from '../../utils/generateCheckMacValue';
 import {
   CreateProductDto,
   GetECPayResultDto,
