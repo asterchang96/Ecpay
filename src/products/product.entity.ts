@@ -1,43 +1,41 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { IsInt } from 'class-validator';
 
-
 @Entity()
 export class Product {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ default: "" })
-  merchantID: String;
+  @Column({ default: '' })
+  merchantID: string;
 
-  @Column({ default: "" })
-  merchantTradeNo: String;
+  @Column({ default: '' })
+  merchantTradeNo: string;
 
-  @Column({ default: "" })
-  paymentDate: String;
+  @Column({ default: '' })
+  paymentDate: string;
 
-  @Column({ default: "unpaid" })
-  paymentType: String; // default :unpaid -> Credit_CreditCard
+  @Column({ default: 'unpaid' })
+  paymentType: string; // default :unpaid -> Credit_CreditCard
 
   @Column({ default: 0 })
   @IsInt({ message: 'rtnCode must be an integer in entity.' })
   rtnCode: number; //交易是否成功(1 成功) > RtnMsg: '交易成功'，其餘都失敗(0:尚未交易)
 
-  @Column({ default: 0 })
-  @IsInt({ message: 'tradeAmt must be an integer in entity.' })
-  tradeAmt: number; // 交易金額
+  @Column({ default: '0' })
+  tradeAmt: string; // 交易金額
 
-  @Column({ default: "" })
+  @Column({ default: '' })
   tradeNo: string;
 
-  @Column({ default: "" })
+  @Column({ default: '' })
   tradeDate: string;
 
-  @Column({ default: "" })
+  @Column({ default: '' })
   checkMacValue: string;
 
-  @Column({ default: "" })
-  paymentTypeChargeFee: string;
+  @Column({ default: 0 })
+  paymentTypeChargeFee: number;
 
   @Column()
   tradeDesc: string;
@@ -45,6 +43,6 @@ export class Product {
   @Column()
   itemName: string;
 
-  @Column()
+  @Column({ type: 'int' })
   totalAmount: number;
 }

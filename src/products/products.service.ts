@@ -1,28 +1,31 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ProductRepository } from './product.repository';
 import { Product } from './product.entity';
 import {
   getCurrentTaipeiTimeString,
   generateCheckMacValue,
 } from '../../utils/index';
-import { CreateProductDto } from './dto/create-product.dto';
+import {
+  CreateProductDto,
+  GetECPayResultDto,
+  UpdateECPayResultDto,
+} from './product.dto';
 
 @Injectable()
 export class ProductsService {
   private readonly logger: Logger = new Logger(ProductsService.name);
   constructor(
-    @InjectRepository(Product)
-    private productsRepository: Repository<Product>,
-  ) { }
-
+    @InjectRepository(ProductRepository)
+    private readonly productRepository: ProductRepository,
+  ) {}
 
   async findAll(): Promise<Product[]> {
-    return await this.productsRepository.find();
+    return await this.productRepository.find();
   }
 
   async findOne(id: number): Promise<Product> {
-    const product = await this.productsRepository.findOne({ where: { id } });
+    const product = await this.productRepository.findOne({ where: { id } });
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
@@ -31,15 +34,13 @@ export class ProductsService {
     return product;
   }
 
-
-
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const newProduct = this.productsRepository.create(createProductDto);
-    return await this.productsRepository.save(newProduct);
+    const newProduct = this.productRepository.create(createProductDto);
+    return await this.productRepository.save(newProduct);
   }
 
   async getECPayForm(id: number): Promise<string> {
-    const product = await this.productsRepository.findOne({ where: { id } });
+    const product = await this.productRepository.findOne({ where: { id } });
 
     if (!product) {
       this.logger.error(`Product with ID ${id} not found.`);
@@ -71,7 +72,7 @@ export class ProductsService {
       checkMacValue: checkMacValue,
     };
 
-    const updateProduct = await this.productsRepository.update(id, updatedData);
+    const updateProduct = await this.productRepository.update(id, updatedData);
     this.logger.log(updateProduct);
 
     const form = `
@@ -93,47 +94,68 @@ export class ProductsService {
     return form;
   }
 
-  async getECPayResult(body): Promise<any> {
+  async getECPayResult(payload: GetECPayResultDto): Promise<any> {
     try {
-      this.logger.log(body);
+      this.logger.log(payload);
 
-      const { RtnCode, PaymentDate, MerchantID, PaymentType, TradeAmt, TradeNo, TradeDate, PaymentTypeChargeFee, MerchantTradeNo, CheckMacValue } = body;
+      const {
+        RtnCode,
+        PaymentDate,
+        MerchantID,
+        PaymentType,
+        TradeAmt,
+        TradeNo,
+        TradeDate,
+        PaymentTypeChargeFee,
+        MerchantTradeNo,
+      } = payload;
 
-      const product = await this.productsRepository.findOne({ where: { merchantTradeNo: MerchantTradeNo } });
+      const product =
+        await this.productRepository.findByMerchantTradeNo(MerchantTradeNo);
       this.logger.log(product);
 
-
       // 交易不成功
-      if (RtnCode !== '1') {
-        const updatedData = {
+      if (RtnCode !== 1) {
+        const updatedData: UpdateECPayResultDto = {
           merchantID: MerchantID,
-          rtnCode: parseInt(RtnCode),
+          merchantTradeNo: MerchantTradeNo,
+          tradeNo: TradeNo,
+          rtnCode: RtnCode,
         };
-        const updateProduct = await this.productsRepository.update(product.id, updatedData);
+        const updateProduct = await this.productRepository.update(
+          product.id,
+          updatedData,
+        );
         this.logger.log(updateProduct);
         return { success: false, error: 'RtnCode is not 1.' };
       }
 
       // 找不到商品
       if (!product) {
-        this.logger.error(`Product with MerchantTradeNo ${MerchantTradeNo} not found.`);
-        throw new Error(`Product with MerchantTradeNo ${MerchantTradeNo} not found.`);
-      }
-      else{
-        const updatedData = {
+        this.logger.error(
+          `Product with MerchantTradeNo ${MerchantTradeNo} not found.`,
+        );
+        throw new Error(
+          `Product with MerchantTradeNo ${MerchantTradeNo} not found.`,
+        );
+      } else {
+        const updatedData: UpdateECPayResultDto = {
           merchantID: MerchantID,
-          rtnCode: parseInt(RtnCode),
+          merchantTradeNo: MerchantTradeNo,
+          rtnCode: RtnCode,
           paymentDate: PaymentDate,
           paymentType: PaymentType,
-          tradeAmt: parseInt(TradeAmt),
+          tradeAmt: TradeAmt,
           tradeNo: TradeNo,
           tradeDate: TradeDate,
           paymentTypeChargeFee: PaymentTypeChargeFee,
         };
-        const updateProduct = await this.productsRepository.update(product.id, updatedData);
+        const updateProduct = await this.productRepository.update(
+          product.id,
+          updatedData,
+        );
         return updateProduct;
       }
-
     } catch (e) {
       this.logger.error(e);
       return { error: 'An error occurred.' };
@@ -143,13 +165,14 @@ export class ProductsService {
   // delete
   async delete(id: number): Promise<any> {
     try {
-      const result = await this.productsRepository.delete(id);
-      this.logger.log(`Product with ID ${id} deleted successfully.`);
-      return { message: `Product with ID ${id} deleted successfully.`, statusCode: 200 };
+      const result = await this.productRepository.delete(id);
+      this.logger.log(
+        `Product with ID ${id} deleted successfully, result: ${result}.`,
+      );
+      return { message: `Product with ID ${id} deleted successfully.` };
     } catch (e) {
       this.logger.error(e);
-      return { error: 'An error occurred while deleting the product.', statusCode: 500 };
+      return { error: 'An error occurred while deleting the product.' };
     }
-
   }
 }

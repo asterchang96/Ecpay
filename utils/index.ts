@@ -32,7 +32,8 @@ export function generateCheckMacValue(
 
   const encodedValue = encodeURIComponent(checkValue).toLowerCase();
 
-  const normalizedValue = encodedValue.replace(/%20/g, '+')
+  const normalizedValue = encodedValue
+    .replace(/%20/g, '+')
     .replace(/%2d/g, '-')
     .replace(/%5f/g, '_')
     .replace(/%2e/g, '.')
@@ -42,7 +43,9 @@ export function generateCheckMacValue(
     .replace(/%29/g, ')')
     .replace(/%20/g, '+');
 
-  const hash = crypto.createHash('sha256').update(normalizedValue).digest('hex');
+  const hash = crypto
+    .createHash('sha256')
+    .update(normalizedValue)
+    .digest('hex');
   return hash.toUpperCase();
 }
-
