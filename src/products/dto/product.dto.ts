@@ -87,3 +87,9 @@ export class UpdateECPayResultDto {
   customField4?: string;
   checkMacValue?: string;
 }
+
+export class ApiResponse {
+  statusCode: number;
+  message?: string;
+  error?: string;
+}

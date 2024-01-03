@@ -10,6 +10,7 @@ import {
   UpdateECPayResultDto,
   ECPayBaseParamsDto,
   UpdateECPayOrderDto,
+  ApiResponse,
 } from './dto/product.dto';
 
 @Injectable()
@@ -102,7 +103,7 @@ export class ProductsService {
     return form;
   }
 
-  async getECPayResult(payload: GetECPayResultDto): Promise<any> {
+  async getECPayResult(payload: GetECPayResultDto): Promise<ApiResponse> {
     try {
       this.logger.log(payload);
 
@@ -132,7 +133,6 @@ export class ProductsService {
           `Product with MerchantTradeNo ${MerchantTradeNo} not found.`,
         );
       } else {
-        this.logger.log('RtnCode === 1');
         const updatedData: UpdateECPayResultDto = {
           merchantID: MerchantID,
           merchantTradeNo: MerchantTradeNo,
@@ -144,30 +144,39 @@ export class ProductsService {
           tradeDate: TradeDate,
           paymentTypeChargeFee: PaymentTypeChargeFee,
         };
-        this.logger.log(updatedData);
         const updateProduct = await this.productRepository.update(
           product.id,
           updatedData,
         );
-        this.logger.debug(updateProduct);
-        return updateProduct;
+        this.logger.log(updateProduct);
+        return { statusCode: 200, message: 'Update success.' };
       }
     } catch (e) {
       this.logger.error(e);
-      return { error: 'An error occurred.' };
+      return { statusCode: 500, error: 'An error occurred.' };
     }
   }
 
-  async delete(id: number): Promise<any> {
+  async delete(id: number): Promise<ApiResponse> {
     try {
+      const product = await this.productRepository.findOne({ where: { id } });
+      if (!product) {
+        throw new Error(`Product with ProductID ${id} not found.`);
+      }
       const result = await this.productRepository.delete(id);
       this.logger.log(
         `Product with ID ${id} deleted successfully, result: ${result}.`,
       );
-      return { message: `Product with ID ${id} deleted successfully.` };
+      return {
+        statusCode: 200,
+        message: `Product with ID ${id} deleted successfully.`,
+      };
     } catch (e) {
       this.logger.error(e);
-      return { error: 'An error occurred while deleting the product.' };
+      return {
+        statusCode: 500,
+        error: 'An error occurred while deleting the product.',
+      };
     }
   }
 }
