@@ -1,8 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-// import { ProductRepository } from './product.repository';
-import { Product } from './product.entity';
+import { Product } from './entity/product.entity';
 import { getCurrentTaipeiTimeString } from '../../utils/getCurrentTaipeiTimeString';
 import { generateCheckMacValue } from '../../utils/generateCheckMacValue';
 import {
@@ -11,7 +10,7 @@ import {
   UpdateECPayResultDto,
   ECPayBaseParamsDto,
   UpdateECPayOrderDto,
-} from './product.dto';
+} from './dto/product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -23,7 +22,6 @@ export class ProductsService {
 
   async findAll(): Promise<Product[]> {
     try {
-      this.logger.log('Attempting to fetch products...');
       const products = await this.productRepository.find();
       this.logger.log('Products fetched successfully:', products);
       return products;
@@ -35,7 +33,6 @@ export class ProductsService {
 
   async findOne(id: number): Promise<Product> {
     const product = await this.productRepository.findOne({ where: { id } });
-    // const product = await this.productRepository.findById(id);
     console.log(`Product with ID ${id} not found`);
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
@@ -120,8 +117,6 @@ export class ProductsService {
         MerchantTradeNo,
       } = payload;
 
-      // const product =
-      //   await this.productRepository.findByMerchantTradeNo(MerchantTradeNo);
       const product = await this.productRepository.findOne({
         where: { merchantTradeNo: MerchantTradeNo },
       });
