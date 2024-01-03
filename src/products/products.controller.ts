@@ -4,7 +4,7 @@ import { Product } from './entity/product.entity';
 import {
   CreateProductDto,
   GetECPayResultDto,
-  ApiResponse,
+  ApiResponseDto,
 } from './dto/product.dto';
 
 @Controller('products')
@@ -21,7 +21,7 @@ export class ProductsController {
   @Post('/order/result')
   getECPayResult(
     @Body() getECPayResultDto: GetECPayResultDto,
-  ): Promise<ApiResponse> {
+  ): Promise<ApiResponseDto> {
     return this.productsService.getECPayResult(getECPayResultDto);
   }
 
@@ -36,7 +36,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  delete(@Param('id') id: number): Promise<ApiResponse> {
+  delete(@Param('id') id: number): Promise<ApiResponseDto> {
     return this.productsService.delete(id);
   }
 

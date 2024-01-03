@@ -88,7 +88,7 @@ export class UpdateECPayResultDto {
   checkMacValue?: string;
 }
 
-export class ApiResponse {
+export class ApiResponseDto {
   statusCode: number;
   message?: string;
   error?: string;

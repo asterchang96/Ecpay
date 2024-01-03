@@ -10,7 +10,7 @@ import {
   UpdateECPayResultDto,
   ECPayBaseParamsDto,
   UpdateECPayOrderDto,
-  ApiResponse,
+  ApiResponseDto,
 } from './dto/product.dto';
 
 @Injectable()
@@ -103,7 +103,7 @@ export class ProductsService {
     return form;
   }
 
-  async getECPayResult(payload: GetECPayResultDto): Promise<ApiResponse> {
+  async getECPayResult(payload: GetECPayResultDto): Promise<ApiResponseDto> {
     try {
       this.logger.log(payload);
 
@@ -157,7 +157,7 @@ export class ProductsService {
     }
   }
 
-  async delete(id: number): Promise<ApiResponse> {
+  async delete(id: number): Promise<ApiResponseDto> {
     try {
       const product = await this.productRepository.findOne({ where: { id } });
       if (!product) {
