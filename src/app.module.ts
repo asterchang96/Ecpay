@@ -1,10 +1,12 @@
 import { Module, Logger } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { config } from './config/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProductsModule } from './products/products.module';
 import * as dotenv from 'dotenv';
+import { DatabaseConfig } from './config/database.config';
 
 dotenv.config();
 
@@ -12,19 +14,11 @@ dotenv.config();
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: process.env.NODE_ENV === 'production' ? '.env.prod' : '.env',
+      load: [config],
     }),
-    TypeOrmModule.forRoot({
-      logging: true,
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT), // PostgreSQL 默認端口
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      // entities: [__dirname, '**', '*.entity.{ts,js}'],
-      synchronize: true, // 在開發環境中使用，生產環境中應該關閉
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: DatabaseConfig,
     }),
     ProductsModule,
   ],

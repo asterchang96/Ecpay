@@ -1,8 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { ProductRepository } from './product.repository';
-import { Product } from './product.entity';
+import { Product } from './entity/product.entity';
 import { getCurrentTaipeiTimeString } from '../../utils/getCurrentTaipeiTimeString';
 import { generateCheckMacValue } from '../../utils/generateCheckMacValue';
 import {
@@ -11,7 +10,7 @@ import {
   UpdateECPayResultDto,
   ECPayBaseParamsDto,
   UpdateECPayOrderDto,
-} from './product.dto';
+} from './dto/product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -23,9 +22,7 @@ export class ProductsService {
 
   async findAll(): Promise<Product[]> {
     try {
-      this.logger.log('Attempting to fetch products...');
       const products = await this.productRepository.findAllProduct();
-      this.logger.log('Products fetched successfully:', products);
       return products;
     } catch (error) {
       this.logger.error('Error fetching products:', error);
@@ -35,8 +32,6 @@ export class ProductsService {
 
   async findOne(id: number): Promise<Product> {
     const product = await this.productRepository.findOne({ where: { id } });
-    // const product = await this.productRepository.findById(id);
-    console.log(`Product with ID ${id} not found`);
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
@@ -124,22 +119,6 @@ export class ProductsService {
         await this.productRepository.findByMerchantTradeNo(MerchantTradeNo);
       this.logger.log(product);
 
-      // 交易不成功
-      if (RtnCode !== 1) {
-        const updatedData: UpdateECPayResultDto = {
-          merchantID: MerchantID,
-          merchantTradeNo: MerchantTradeNo,
-          tradeNo: TradeNo,
-          rtnCode: RtnCode,
-        };
-        const updateProduct = await this.productRepository.update(
-          product.id,
-          updatedData,
-        );
-        this.logger.log(updateProduct);
-        return { success: false, error: 'RtnCode is not 1.' };
-      }
-
       // 找不到商品
       if (!product) {
         this.logger.error(
@@ -149,6 +128,7 @@ export class ProductsService {
           `Product with MerchantTradeNo ${MerchantTradeNo} not found.`,
         );
       } else {
+        this.logger.log('RtnCode === 1');
         const updatedData: UpdateECPayResultDto = {
           merchantID: MerchantID,
           merchantTradeNo: MerchantTradeNo,
@@ -160,10 +140,12 @@ export class ProductsService {
           tradeDate: TradeDate,
           paymentTypeChargeFee: PaymentTypeChargeFee,
         };
+        this.logger.log(updatedData);
         const updateProduct = await this.productRepository.update(
           product.id,
           updatedData,
         );
+        this.logger.debug(updateProduct);
         return updateProduct;
       }
     } catch (e) {
@@ -172,7 +154,6 @@ export class ProductsService {
     }
   }
 
-  // delete
   async delete(id: number): Promise<any> {
     try {
       const result = await this.productRepository.delete(id);
