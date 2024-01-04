@@ -1,6 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ProductRepository } from './product.repository';
+import { ProductsRepository } from './products.repository';
 import { Product } from './entity/product.entity';
 import { getCurrentTaipeiTimeString } from '../../utils/getCurrentTaipeiTimeString';
 import { generateCheckMacValue } from '../../utils/generateCheckMacValue';
@@ -15,14 +14,11 @@ import {
 @Injectable()
 export class ProductsService {
   private readonly logger: Logger = new Logger(ProductsService.name);
-  constructor(
-    @InjectRepository(Product)
-    private readonly productRepository: ProductRepository,
-  ) {}
+  private readonly productsRepository: ProductsRepository;
 
   async findAll(): Promise<Product[]> {
     try {
-      const products = await this.productRepository.findAllProduct();
+      const products = await this.productsRepository.findAllProducts();
       return products;
     } catch (error) {
       this.logger.error('Error fetching products:', error);
@@ -31,7 +27,7 @@ export class ProductsService {
   }
 
   async findOne(id: number): Promise<Product> {
-    const product = await this.productRepository.findOne({ where: { id } });
+    const product = await this.productsRepository.findProductById(id);
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
@@ -40,12 +36,13 @@ export class ProductsService {
   }
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const newProduct = this.productRepository.create(createProductDto);
-    return await this.productRepository.save(newProduct);
+    const newProduct = this.productsRepository.create(createProductDto);
+    return newProduct;
   }
 
   async getECPayForm(id: number): Promise<string> {
-    const product = await this.productRepository.findOne({ where: { id } });
+    const product = await this.productsRepository.findProductById(id);
+    // const product = await this.productsRepository.findOne({ where: { id } });
 
     if (!product) {
       this.logger.error(`Product with ID ${id} not found.`);
@@ -77,7 +74,7 @@ export class ProductsService {
       checkMacValue: checkMacValue,
     };
 
-    const updateProduct = await this.productRepository.update(id, updatedData);
+    const updateProduct = await this.productsRepository.update(id, updatedData);
     this.logger.log(updateProduct);
 
     const form = `
@@ -116,7 +113,7 @@ export class ProductsService {
       } = payload;
 
       const product =
-        await this.productRepository.findByMerchantTradeNo(MerchantTradeNo);
+        await this.productsRepository.findByMerchantTradeNo(MerchantTradeNo);
       this.logger.log(product);
 
       // 找不到商品
@@ -141,7 +138,7 @@ export class ProductsService {
           paymentTypeChargeFee: PaymentTypeChargeFee,
         };
         this.logger.log(updatedData);
-        const updateProduct = await this.productRepository.update(
+        const updateProduct = await this.productsRepository.update(
           product.id,
           updatedData,
         );
@@ -156,7 +153,7 @@ export class ProductsService {
 
   async delete(id: number): Promise<any> {
     try {
-      const result = await this.productRepository.delete(id);
+      const result = await this.productsRepository.delete(id);
       this.logger.log(
         `Product with ID ${id} deleted successfully, result: ${result}.`,
       );

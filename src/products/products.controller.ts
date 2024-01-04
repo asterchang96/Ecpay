@@ -5,7 +5,7 @@ import { CreateProductDto, GetECPayResultDto } from './dto/product.dto';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) { }
+  constructor(private readonly productsService: ProductsService) {}
 
   // Post2ecpay
   @Get('/order/:id')
