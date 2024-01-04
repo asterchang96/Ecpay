@@ -162,7 +162,7 @@ export class ProductsService {
       const product = await this.productsRepository.findProductById(id);
       if (!product) {
         return {
-          statusCode: 500,
+          statusCode: 404,
           message: `ProductID ${id} is not found.`,
         };
       }

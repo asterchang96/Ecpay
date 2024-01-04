@@ -41,10 +41,8 @@ const mockProducts: Product[] = [
   },
 ];
 
-// 使用 jest.mock 來模擬 repository
 jest.mock('./products.repository', () => ({
   ProductsRepository: jest.fn(() => ({
-    // 這裡可以加入你想要模擬的 repository 方法
     findAll: jest.fn(() => mockProducts),
   })),
 }));
@@ -121,7 +119,7 @@ describe('ProductsController', () => {
     it('should handle Product not found.', async () => {
       const productId = 4;
       const mockApiResponseDto: ApiResponseDto = {
-        statusCode: 200,
+        statusCode: 404,
         message: 'Product not found',
       };
 
@@ -171,5 +169,4 @@ describe('ProductsController', () => {
       expect(productsService.create).toHaveBeenCalledWith(createProductDto);
     });
   });
-
 });
