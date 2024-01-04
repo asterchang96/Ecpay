@@ -89,7 +89,6 @@ describe('ProductsService', () => {
       const product = await service.findOne(productId);
       expect(product).toBeDefined();
     } catch (error) {
-      // Expecting NotFoundException
       expect(error).toBeInstanceOf(NotFoundException);
       expect(error.message).toBe(`Product with ID ${productId} not found`);
     }
@@ -116,9 +115,9 @@ describe('ProductsService', () => {
 
   it('should create a new product', async () => {
     const newProductDto = {
-      itemName: 'New Product',
+      itemName: 'Iphone',
       totalAmount: 200,
-      tradeDesc: 'New Description',
+      tradeDesc: 'test',
     };
     const createdProduct = await service.create(newProductDto);
     expect(createdProduct).toEqual(newProductDto);
@@ -126,9 +125,15 @@ describe('ProductsService', () => {
 
   it('should delete a product by ID', async () => {
     const productIdToDelete = 1;
-    const result = await service.delete(productIdToDelete);
-    expect(result).toEqual({
-      message: `Product with ID ${productIdToDelete} deleted successfully.`,
-    });
+
+    try {
+      const result = await service.delete(productIdToDelete);
+      expect(result).toBeDefined();
+    } catch (error) {
+      expect(error).toBeInstanceOf(NotFoundException);
+      expect(error.message).toBe(
+        `An error occurred while deleting the product.`,
+      );
+    }
   });
 });

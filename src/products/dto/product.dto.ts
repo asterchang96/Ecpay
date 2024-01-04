@@ -10,42 +10,65 @@ export class CreateProductDto {
   // product name (required) 1-50
   @IsNotEmpty()
   @IsString()
-  @MaxLength(50, { message: 'itemName should not exceed 50 characters' })
+  @MaxLength(50)
   readonly itemName: string;
 
   // product price (required)
   @IsNotEmpty()
-  @IsInt({ message: 'totalAmount must be an integer.' })
+  @IsInt()
   @IsPositive()
   readonly totalAmount: number;
 
   // product description (opt.) null-200
   @IsNotEmpty()
-  @MaxLength(200, { message: 'itemName should not exceed 200 characters' })
+  @MaxLength(200)
   readonly tradeDesc: string;
 }
 
-export interface GetECPayResultDto {
-  MerchantID: string;
-  MerchantTradeNo: string;
-  TradeNo: string;
+// 傳至 checkMacValue
+export class ECPayBaseParamsDto {
+  readonly MerchantID: string;
+  readonly MerchantTradeNo: string;
+  readonly MerchantTradeDate: string;
+  readonly PaymentType: string;
+  readonly TotalAmount: number;
+  readonly TradeDesc: string;
+  readonly ItemName: string;
+  readonly ReturnURL: string;
+  readonly ChoosePayment: string;
+  readonly EncryptType: number;
+}
+
+// 更新產生訂單資料
+export class UpdateECPayOrderDto {
+  merchantID: string;
+  merchantTradeNo: string;
+  checkMacValue: string;
+}
+
+// 取得 ecpay 回傳資料
+export class GetECPayResultDto {
+  readonly MerchantID: string;
+  readonly MerchantTradeNo: string;
+  readonly TradeNo: string;
+  readonly RtnCode: number;
+  readonly TradeAmt: string;
+  readonly PaymentDate: string;
+  readonly PaymentType: string;
+  readonly TradeDate: string;
+  readonly CheckMacValue: string;
   StoreID: string;
-  RtnCode: number;
   RtnMsg: string;
-  TradeAmt: string;
-  PaymentDate: string;
-  PaymentType: string;
   PaymentTypeChargeFee: number;
-  TradeDate: string;
   SimulatePaid: number;
   CustomField1: string;
   CustomField2: string;
   CustomField3: string;
   CustomField4: string;
-  CheckMacValue: string;
 }
 
-export interface UpdateECPayResultDto {
+// 更新回 Product
+export class UpdateECPayResultDto {
   merchantID: string;
   merchantTradeNo: string;
   tradeNo: string;
@@ -65,22 +88,8 @@ export interface UpdateECPayResultDto {
   checkMacValue?: string;
 }
 
-// 更新產生訂單資料
-export interface UpdateECPayOrderDto {
-  merchantID: string;
-  merchantTradeNo: string;
-  checkMacValue: string;
-}
-
-export interface ECPayBaseParamsDto {
-  MerchantID: string;
-  MerchantTradeNo: string;
-  MerchantTradeDate: string;
-  PaymentType: string;
-  TotalAmount: number;
-  TradeDesc: string;
-  ItemName: string;
-  ReturnURL: string;
-  ChoosePayment: string;
-  EncryptType: number;
+export class ApiResponseDto {
+  statusCode: number;
+  message?: string;
+  error?: string;
 }

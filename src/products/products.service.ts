@@ -9,12 +9,19 @@ import {
   UpdateECPayResultDto,
   ECPayBaseParamsDto,
   UpdateECPayOrderDto,
+  ApiResponseDto,
 } from './dto/product.dto';
 
 @Injectable()
 export class ProductsService {
   private readonly logger: Logger = new Logger(ProductsService.name);
+
   constructor(private readonly productsRepository: ProductsRepository) {}
+
+  // constructor(
+  //   @InjectRepository(Product)
+  //   private readonly productRepository: Repository<Product>,
+  // ) {}
 
   async findAll(): Promise<Product[]> {
     try {
@@ -31,7 +38,6 @@ export class ProductsService {
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
-
     return product;
   }
 
@@ -43,7 +49,6 @@ export class ProductsService {
 
   async getECPayForm(id: number): Promise<string> {
     const product = await this.productsRepository.findProductById(id);
-    // const product = await this.productsRepository.findOne({ where: { id } });
 
     if (!product) {
       this.logger.error(`Product with ID ${id} not found.`);
@@ -80,13 +85,17 @@ export class ProductsService {
 
     const form = `
       <form action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="POST" name="payment">
+      商品名稱 ItemName : ${baseParam.ItemName}</br>
+      金額 TotalAmount : ${baseParam.TotalAmount}</br>
+      商品描述 TradeDesc : ${baseParam.TradeDesc}</br>
+      交易時間 MerchantTradeDate : ${baseParam.MerchantTradeDate}</br>
       <input name="MerchantID" style="display: none;" value="${baseParam.MerchantID}" />
       <input name="MerchantTradeNo" style="display: none;" value="${baseParam.MerchantTradeNo}"/>
-      MerchantTradeDate <input name="MerchantTradeDate" value="${baseParam.MerchantTradeDate}" /></br>
+      <input name="MerchantTradeDate" style="display: none;" value="${baseParam.MerchantTradeDate}"/>
       <input name="PaymentType" style="display: none;" value="${baseParam.PaymentType}" />
-      TotalAmount <input name="TotalAmount" value=${baseParam.TotalAmount} /></br>
-      TradeDesc <input name="TradeDesc" value="${baseParam.TradeDesc}" /></br>
-      ItemName <input name="ItemName" value="${baseParam.ItemName}" /></br>
+      <input name="TotalAmount" style="display: none;" value="${baseParam.TotalAmount}" />
+      <input name="TradeDesc" style="display: none;" value="${baseParam.TradeDesc}" />
+      <input name="ItemName" style="display: none;" value="${baseParam.ItemName}" />
       <input name="ReturnURL" style="display: none;"value="${baseParam.ReturnURL}" />
       <input name="ChoosePayment" style="display: none;" value="${baseParam.ChoosePayment}" />
       <input name="EncryptType" style="display: none;" value=${baseParam.EncryptType} />
@@ -97,7 +106,7 @@ export class ProductsService {
     return form;
   }
 
-  async getECPayResult(payload: GetECPayResultDto): Promise<any> {
+  async getECPayResult(payload: GetECPayResultDto): Promise<ApiResponseDto> {
     try {
       this.logger.log(payload);
 
@@ -126,7 +135,6 @@ export class ProductsService {
           `Product with MerchantTradeNo ${MerchantTradeNo} not found.`,
         );
       } else {
-        this.logger.log('RtnCode === 1');
         const updatedData: UpdateECPayResultDto = {
           merchantID: MerchantID,
           merchantTradeNo: MerchantTradeNo,
@@ -138,30 +146,35 @@ export class ProductsService {
           tradeDate: TradeDate,
           paymentTypeChargeFee: PaymentTypeChargeFee,
         };
-        this.logger.log(updatedData);
         const updateProduct = await this.productsRepository.update(
           product.id,
           updatedData,
         );
-        this.logger.debug(updateProduct);
-        return updateProduct;
+        this.logger.log(updateProduct);
+        return { statusCode: 200, message: 'Update success.' };
       }
     } catch (e) {
       this.logger.error(e);
-      return { error: 'An error occurred.' };
+      return { statusCode: 500, error: 'An error occurred.' };
     }
   }
 
-  async delete(id: number): Promise<any> {
+  async delete(id: number): Promise<ApiResponseDto> {
     try {
       const result = await this.productsRepository.deleteProductById(id);
       this.logger.log(
         `Product with ID ${id} deleted successfully, result: ${result}.`,
       );
-      return { message: `Product with ID ${id} deleted successfully.` };
+      return {
+        statusCode: 200,
+        message: `Product with ID ${id} deleted successfully.`,
+      };
     } catch (e) {
       this.logger.error(e);
-      return { error: 'An error occurred while deleting the product.' };
+      return {
+        statusCode: 500,
+        error: 'An error occurred while deleting the product.',
+      };
     }
   }
 }
