@@ -14,7 +14,7 @@ import {
 @Injectable()
 export class ProductsService {
   private readonly logger: Logger = new Logger(ProductsService.name);
-  private readonly productsRepository: ProductsRepository;
+  constructor(private readonly productsRepository: ProductsRepository) {}
 
   async findAll(): Promise<Product[]> {
     try {
@@ -37,6 +37,7 @@ export class ProductsService {
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
     const newProduct = this.productsRepository.create(createProductDto);
+    this.logger.log(`Product with ID ${newProduct}`);
     return newProduct;
   }
 
@@ -153,7 +154,7 @@ export class ProductsService {
 
   async delete(id: number): Promise<any> {
     try {
-      const result = await this.productsRepository.delete(id);
+      const result = await this.productsRepository.deleteProductById(id);
       this.logger.log(
         `Product with ID ${id} deleted successfully, result: ${result}.`,
       );

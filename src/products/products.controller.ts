@@ -34,7 +34,7 @@ export class ProductsController {
   //delete
   @Delete(':id')
   async delete(@Param('id') id: number): Promise<any> {
-    return await this.productsService.findOne(id);
+    return await this.productsService.delete(id);
   }
 
   // 建立訂單

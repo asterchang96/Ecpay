@@ -4,55 +4,59 @@ import { InjectDataSource } from '@nestjs/typeorm';
 
 export class ProductsRepository {
   constructor(@InjectDataSource() private datasource: DataSource) {}
-
   async findByMerchantTradeNo(
     merchantTradeNo: string,
   ): Promise<Product | undefined> {
     return await this.datasource
-      .createQueryBuilder()
-      .from(Product, 'product')
+      .getRepository(Product)
+      .createQueryBuilder('product')
       .where('product.merchantTradeNo = :merchantTradeNo', {
         merchantTradeNo: merchantTradeNo,
       })
       .getOne();
   }
+
   async findAllProducts(): Promise<Product[]> {
-    return await this.datasource.createQueryBuilder().getMany();
+    return await this.datasource
+      .getRepository(Product)
+      .createQueryBuilder('product')
+      .orderBy('product.id', 'DESC')
+      .getMany();
   }
 
   async findProductById(productId: number): Promise<any> {
-    // return productId;
     return await this.datasource
-      .createQueryBuilder()
-      .from(Product, 'product')
-      .where('product.id = :productId', { productId })
+      .getRepository(Product)
+      .createQueryBuilder('product')
+      .where('product.id = :id', { id: productId })
       .getOne();
   }
 
-  async update(productId: number, product: Partial<Product>): Promise<any> {
+  async update(id: number, product: Partial<Product>): Promise<any> {
     await this.datasource
+      .getRepository(Product)
       .createQueryBuilder()
       .update(Product)
       .set(product)
-      .where('id = :id', { productId })
+      .where('id = :id', { id })
       .execute();
   }
 
-  async delete(productId: number): Promise<any> {
-    await this.datasource
+  async deleteProductById(id: number): Promise<any> {
+    return await this.datasource
       .createQueryBuilder()
       .delete()
-      .from(Product, 'product')
-      .where('id = :id', { productId })
+      .from(Product)
+      .where('id = :id', { id })
       .execute();
   }
 
   async create(product: Partial<Product>): Promise<any> {
-    await this.datasource
+    return await this.datasource
       .createQueryBuilder()
       .insert()
       .into(Product)
-      .values(product)
+      .values([product])
       .execute();
   }
 }
