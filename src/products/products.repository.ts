@@ -3,7 +3,7 @@ import { Product } from './entity/product.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 
 export class ProductsRepository {
-  constructor(@InjectDataSource() private datasource: DataSource) {}
+  constructor(@InjectDataSource() private datasource: DataSource) { }
   async findByMerchantTradeNo(
     merchantTradeNo: string,
   ): Promise<Product | undefined> {
@@ -24,7 +24,7 @@ export class ProductsRepository {
       .getMany();
   }
 
-  async findProductById(productId: number): Promise<any> {
+  async findProductById(productId: number): Promise<Product | undefined> {
     return await this.datasource
       .getRepository(Product)
       .createQueryBuilder('product')
@@ -32,31 +32,37 @@ export class ProductsRepository {
       .getOne();
   }
 
-  async update(id: number, product: Partial<Product>): Promise<any> {
-    await this.datasource
+  async updateProductById(
+    id: number,
+    product: Partial<Product>,
+  ): Promise<boolean> {
+    const result = await this.datasource
       .getRepository(Product)
       .createQueryBuilder()
       .update(Product)
       .set(product)
       .where('id = :id', { id })
       .execute();
+    return !!result.affected;
   }
 
-  async deleteProductById(id: number): Promise<any> {
-    return await this.datasource
+  async deleteProductById(id: number): Promise<boolean> {
+    const result = await this.datasource
       .createQueryBuilder()
       .delete()
       .from(Product)
       .where('id = :id', { id })
       .execute();
+    return !!result.affected;
   }
 
-  async create(product: Partial<Product>): Promise<any> {
-    return await this.datasource
+  async createProduct(product: Partial<Product>): Promise<any> {
+    const newProduct = await this.datasource
       .createQueryBuilder()
       .insert()
       .into(Product)
       .values([product])
       .execute();
+    return newProduct.raw[0];
   }
 }

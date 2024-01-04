@@ -18,11 +18,6 @@ export class ProductsService {
 
   constructor(private readonly productsRepository: ProductsRepository) {}
 
-  // constructor(
-  //   @InjectRepository(Product)
-  //   private readonly productRepository: Repository<Product>,
-  // ) {}
-
   async findAll(): Promise<Product[]> {
     try {
       const products = await this.productsRepository.findAllProducts();
@@ -42,7 +37,7 @@ export class ProductsService {
   }
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const newProduct = this.productsRepository.create(createProductDto);
+    const newProduct = this.productsRepository.createProduct(createProductDto);
     this.logger.log(`Product with ID ${newProduct}`);
     return newProduct;
   }
@@ -80,7 +75,10 @@ export class ProductsService {
       checkMacValue: checkMacValue,
     };
 
-    const updateProduct = await this.productsRepository.update(id, updatedData);
+    const updateProduct = await this.productsRepository.updateProductById(
+      id,
+      updatedData,
+    );
     this.logger.log(updateProduct);
 
     const form = `
@@ -146,7 +144,7 @@ export class ProductsService {
           tradeDate: TradeDate,
           paymentTypeChargeFee: PaymentTypeChargeFee,
         };
-        const updateProduct = await this.productsRepository.update(
+        const updateProduct = await this.productsRepository.updateProductById(
           product.id,
           updatedData,
         );
@@ -161,13 +159,20 @@ export class ProductsService {
 
   async delete(id: number): Promise<ApiResponseDto> {
     try {
+      const product = await this.productsRepository.findProductById(id);
+      if (!product) {
+        return {
+          statusCode: 500,
+          message: `ProductID ${id} is not found.`,
+        };
+      }
       const result = await this.productsRepository.deleteProductById(id);
       this.logger.log(
-        `Product with ID ${id} deleted successfully, result: ${result}.`,
+        `ProductID ${id} deleted successfully, result: ${result}.`,
       );
       return {
         statusCode: 200,
-        message: `Product with ID ${id} deleted successfully.`,
+        message: `ProductID ${id} deleted successfully.`,
       };
     } catch (e) {
       this.logger.error(e);
@@ -177,4 +182,19 @@ export class ProductsService {
       };
     }
   }
+
+  // async updateProduct(id: number): Promise<any> {
+  //   const updatedData: UpdateECPayOrderDto = {
+  //     merchantID: '測試',
+  //     merchantTradeNo: '測試',
+  //     checkMacValue: '123',
+  //   };
+  //   this.logger.log(id, updatedData);
+  //   const updateProduct = await this.productsRepository.updateProductById(
+  //     id,
+  //     updatedData,
+  //   );
+  //   this.logger.log(updateProduct);
+  //   return updateProduct;
+  // }
 }

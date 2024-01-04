@@ -44,4 +44,9 @@ export class ProductsController {
   create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     return this.productsService.create(createProductDto);
   }
+
+  // @Post('/order/:id')
+  // update(@Param('id') id: number): Promise<any> {
+  //   return this.productsService.updateProduct(id);
+  // }
 }
